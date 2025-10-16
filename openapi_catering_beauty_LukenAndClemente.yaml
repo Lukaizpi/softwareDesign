@@ -1,0 +1,1283 @@
+openapi: 3.0.3
+info:
+  title: Catering & Beauty SaaS API
+  version: "1.0.0"
+  description: |
+    REST API for a SaaS platform targeted at small/medium businesses in catering (bars, cafes, restaurants)
+    and beauty (barbers, hairdressers, SPA). Contains authentication, merchant & user management, products,
+    orders, reservations, payments (Stripe integration), discounts and taxes.
+servers:
+  - url: https://api.example.com/v1
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    Error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    Paging:
+      type: object
+      properties:
+        page:
+          type: integer
+        pageSize:
+          type: integer
+        total:
+          type: integer
+    Merchant:
+      type: object
+      required: 
+        - id
+        - name
+      properties:
+        id:
+          type: string
+          example: m_123456
+        name:
+          type: string
+          example: John's Coffee
+        address:
+          type: string
+          example: 123 Main St, Vilnius
+        phone:
+          type: string
+          example: "+37061234567"
+        email:
+          type: string
+          format: email
+    User:
+      type: object
+      required: 
+        - id
+        - merchantId
+        - name
+        - email
+        - role
+      properties:
+        id: 
+          type: string
+          example: u_98765
+        merchantId: 
+          type: string
+          example: m_123456
+        name: 
+          type: string
+          example: "Alice Employee"
+        email: 
+          type: string
+          format: email
+          example: "alice@example.com"
+        role:
+          type: string
+          enum: 
+            - superadmin
+            - owner
+            - employee
+        phone: 
+          type: string
+          example: "+37060000000"
+    Product:
+      type: object
+      required: 
+        - id
+        - merchantId
+        - name
+        - basePrice
+      properties:
+        id: 
+          type: string
+          example: p_001
+        merchantId: 
+          type: string
+          example: m_123456
+        name: 
+          type: string
+          example: "Espresso"
+        description: 
+          type: string
+        basePrice:
+          type: integer
+          description: Price in cents (integer) to avoid floating rounding issues
+          example: 200
+        taxable:
+          type: boolean
+          example: true
+    ProductVariation:
+      type: object
+      required: 
+        - id
+        - productId
+        - name
+        - price
+      properties:
+        id: 
+          type: string
+          example: pv_001
+        productId: 
+          type: string
+          example: p_001
+        name: 
+          type: string
+          example: "With oat milk"
+        price:
+          type: integer
+          example: 250
+    OrderItem:
+      type: object
+      required: 
+        - id
+        - productId
+        - quantity
+        - unitPrice
+      properties:
+        id: 
+          type: string
+          example: oi_001
+        productId: 
+          type: string
+          example: p_001
+        variationId: 
+          type: string
+          nullable: true
+          example: pv_001
+        name: 
+          type: string
+          example: "Espresso (with oat milk)"
+        quantity: 
+          type: integer
+          example: 2
+          minimum: 1
+        unitPrice:
+          type: integer
+          description: unit price in cents
+          example: 250
+        taxes:
+          type: array
+          items:
+            type: object
+            properties:
+              taxId: 
+                type: string
+              name: 
+                type: string
+              rate: 
+                type: number
+              amount: 
+                type: integer
+        discountApplied:
+          type: object
+          nullable: true
+          properties:
+            discountId: 
+              type: string
+            amount: 
+              type: integer
+    OrderSnapshot:
+      type: object
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        subtotal: 
+          type: integer
+        taxes: 
+          type: integer
+        discounts: 
+          type: integer
+        serviceCharges: 
+          type: integer
+        total: 
+          type: integer
+    Order:
+      type: object
+      required: 
+        - id
+        - merchantId
+        - status
+      properties:
+        id: 
+          type: string
+          example: ord_1001
+        merchantId: 
+          type: string
+          example: m_123456
+        employeeId: 
+          type: string
+          example: u_98765
+        status:
+          type: string
+          enum: 
+            - open
+            - closed
+            - cancelled
+            - refunded
+          example: open
+        createdAt: 
+          type: string
+          format: date-time
+        closedAt: 
+          type: string
+          format: date-time
+          nullable: true
+        customer:
+          type: object
+          properties:
+            name: 
+              type: string
+            phone: 
+              type: string
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/OrderItem'
+        snapshot:
+          $ref: '#/components/schemas/OrderSnapshot'
+        total:
+          type: integer
+    Payment:
+      type: object
+      required: 
+        - id
+        - orderId
+        - method
+        - amount
+      properties:
+        id: 
+          type: string
+          example: pay_001
+        orderId: 
+          type: string
+          example: ord_1001
+        method:
+          type: string
+          enum: 
+            - cash
+            - giftcard
+            - card
+            - stripe
+        amount:
+          type: integer
+          example: 500
+        currency:
+          type: string
+          example: EUR
+        status:
+          type: string
+          enum: 
+            - pending
+            - succeeded
+            - failed
+            - refunded
+        providerPaymentId:
+          type: string
+          example: pi_1GqIC8...
+    Reservation:
+      type: object
+      required: 
+        - id
+        - merchantId
+        - appointmentTime
+        - customerName
+      properties:
+        id: 
+          type: string
+          example: r_001
+        merchantId: 
+          type: string
+          example: m_123456
+        employeeId: 
+          type: string
+          nullable: true
+          example: u_98765
+        customerName: 
+          type: string
+          example: "John Doe"
+        customerPhone: 
+          type: string
+          example: "+37060000000"
+        appointmentTime: 
+          type: string
+          format: date-time
+        bookedAt: 
+          type: string
+          format: date-time
+        serviceId: 
+          type: string
+          example: p_010
+        partySize: 
+          type: integer
+          example: 2
+        comments: 
+          type: string
+    Tax:
+      type: object
+      required: 
+        - id
+        - name
+        - rate
+      properties:
+        id: 
+          type: string
+          example: t_vat21
+        name: 
+          type: string
+          example: "VAT 21%"
+        rate: 
+          type: number
+          example: 21.0
+        active: 
+          type: boolean
+          example: true
+    Discount:
+      type: object
+      required: 
+        - id
+        - name
+      properties:
+        id: 
+          type: string
+          example: d_happyhour
+        name: 
+          type: string
+          example: "Happy Hour -50%"
+        percentage: 
+          type: number
+          example: 50
+        validFrom: 
+          type: string
+          format: date-time
+        validTo: 
+          type: string
+          format: date-time
+  parameters:
+    merchantIdParam:
+      name: merchantId
+      in: path
+      required: true
+      schema:
+        type: string
+    orderIdParam:
+      name: orderId
+      in: path
+      required: true
+      schema:
+        type: string
+security:
+  - bearerAuth: []
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user (owner or employee)
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - merchantId
+                - name
+                - email
+                - password
+                - role
+              properties:
+                merchantId: 
+                  type: string
+                name: 
+                  type: string
+                email: 
+                  type: string
+                  format: email
+                password: 
+                  type: string
+                  format: password
+                role:
+                  type: string
+                  enum: 
+                    - owner
+                    - employee
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/login:
+    post:
+      summary: Login and receive JWT tokens
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - email
+                - password
+              properties:
+                email: 
+                  type: string
+                  format: email
+                password: 
+                  type: string
+      responses:
+        '200':
+          description: tokens
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken: 
+                    type: string
+                  refreshToken: 
+                    type: string
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  /auth/refresh:
+    post:
+      summary: Refresh JWT access token
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - refreshToken
+              properties:
+                refreshToken: 
+                  type: string
+      responses:
+        '200': 
+          description: New access token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accessToken: 
+                    type: string
+  /merchants:
+    post:
+      summary: Create a merchant (business)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Merchant'
+      responses:
+        '201':
+          description: Merchant created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Merchant'
+    get:
+      summary: List merchants (paginated)
+      parameters:
+        - in: query
+          name: page
+          schema: 
+            type: integer
+            default: 1
+        - in: query
+          name: pageSize
+          schema: 
+            type: integer
+            default: 20
+      responses:
+        '200':
+          description: merchant list
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  paging: 
+                    $ref: '#/components/schemas/Paging'
+                  items:
+                    type: array
+                    items: 
+                      $ref: '#/components/schemas/Merchant'
+  /merchants/{merchantId}:
+    get:
+      summary: Get merchant details
+      parameters:
+        - $ref: '#/components/parameters/merchantIdParam'
+      responses:
+        '200':
+          description: merchant
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Merchant'
+    put:
+      summary: Update merchant
+      parameters:
+        - $ref: '#/components/parameters/merchantIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Merchant'
+      responses:
+        '200':
+          description: updated
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Merchant'
+    delete:
+      summary: Delete merchant
+      parameters:
+        - $ref: '#/components/parameters/merchantIdParam'
+      responses:
+        '204': 
+          description: No Content
+  /users:
+    post:
+      summary: Create user (owner/employee)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: created user
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/User'
+    get:
+      summary: List users
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: merchantId
+          schema: 
+            type: string
+      responses:
+        '200':
+          description: users list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/User'
+  /users/{userId}:
+    get:
+      summary: Get user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: 
+            type: string
+      responses:
+        '200':
+          description: user
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/User'
+    put:
+      summary: Update user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/User'
+      responses:
+        '200': 
+          description: updated
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/User'
+    delete:
+      summary: Delete user
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: userId
+          required: true
+          schema: 
+            type: string
+      responses:
+        '204': 
+          description: No Content
+  /products:
+    post:
+      summary: Create product (menu item or service)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Product'
+      responses:
+        '201':
+          description: created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Product'
+    get:
+      summary: List products for a merchant
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: merchantId
+          schema: 
+            type: string
+      responses:
+        '200':
+          description: list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Product'
+  /products/{productId}:
+    get:
+      summary: Get product
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema: 
+            type: string
+      responses:
+        '200': 
+          description: product
+          content: 
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/Product'
+    put:
+      summary: Update product
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Product'
+      responses:
+        '200': 
+          description: updated
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Product'
+    delete:
+      summary: Delete product
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema: 
+            type: string
+      responses:
+        '204': 
+          description: No Content
+  /products/{productId}/variations:
+    post:
+      summary: Create product variation
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/ProductVariation'
+      responses:
+        '201': 
+          description: created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/ProductVariation'
+    get:
+      summary: List variations for product
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          schema: 
+            type: string
+      responses:
+        '200':
+          description: list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/ProductVariation'
+  /orders:
+    post:
+      summary: Create order (open)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - merchantId
+                - items
+              properties:
+                merchantId: 
+                  type: string
+                employeeId: 
+                  type: string
+                customer:
+                  type: object
+                  properties:
+                    name: 
+                      type: string
+                    phone: 
+                      type: string
+                items:
+                  type: array
+                  items:
+                    type: object
+                    required: 
+                      - productId
+                      - quantity
+                      - unitPrice
+                    properties:
+                      productId: 
+                        type: string
+                      variationId: 
+                        type: string
+                      name: 
+                        type: string
+                      quantity: 
+                        type: integer
+                      unitPrice: 
+                        type: integer
+      responses:
+        '201':
+          description: order created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Order'
+    get:
+      summary: List orders (filter by merchant, status, date)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: merchantId
+          schema: 
+            type: string
+        - in: query
+          name: status
+          schema: 
+            type: string
+      responses:
+        '200':
+          description: orders list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Order'
+  /orders/{orderId}:
+    get:
+      summary: Get order by id
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/orderIdParam'
+      responses:
+        '200': 
+          description: ok
+          content: 
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/Order'
+    put:
+      summary: Update order (only if open)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/orderIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                items:
+                  type: array
+                  items: 
+                    $ref: '#/components/schemas/OrderItem'
+      responses:
+        '200': 
+          description: updated
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Order'
+        '400': 
+          description: cannot modify closed order
+          content: 
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/Error'
+    delete:
+      summary: Cancel order (only if open/unpaid)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/orderIdParam'
+      responses:
+        '204': 
+          description: cancelled
+  /orders/{orderId}/close:
+    post:
+      summary: Close order (compute totals and snapshot)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/orderIdParam'
+      responses:
+        '200':
+          description: closed
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Order'
+  /orders/{orderId}/refund:
+    post:
+      summary: Refund order (partial or total)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/orderIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount: 
+                  type: integer
+                reason: 
+                  type: string
+      responses:
+        '200': 
+          description: refund processed
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Order'
+  /orders/{orderId}/payments:
+    post:
+      summary: Add payment to order (supports split payments)
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/orderIdParam'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - method
+                - amount
+              properties:
+                method:
+                  type: string
+                  enum: 
+                    - cash
+                    - giftcard
+                    - card
+                    - stripe
+                amount: 
+                  type: integer
+                metadata: 
+                  type: object
+      responses:
+        '201':
+          description: payment recorded
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Payment'
+  /payments/stripe/create-payment-intent:
+    post:
+      summary: Create Stripe PaymentIntent for card payment (server-side)
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: 
+                - orderId
+                - amount
+                - currency
+              properties:
+                orderId: 
+                  type: string
+                amount: 
+                  type: integer
+                currency: 
+                  type: string
+                  example: EUR
+      responses:
+        '200':
+          description: payment intent created (return clientSecret to frontend)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clientSecret: 
+                    type: string
+                    example: "pi_ABC_secret_..."
+                  paymentIntentId: 
+                    type: string
+                    example: "pi_1GqIC8..."
+  /payments/stripe/webhook:
+    post:
+      summary: Stripe webhook endpoint. Verify signature and process events.
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '200': 
+          description: received
+  /reservations:
+    post:
+      summary: Create reservation/appointment
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Reservation'
+      responses:
+        '201': 
+          description: created
+          content: 
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/Reservation'
+    get:
+      summary: List reservations
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: merchantId
+          schema: 
+            type: string
+        - in: query
+          name: date
+          schema: 
+            type: string
+            format: date
+      responses:
+        '200':
+          description: list
+          content:
+            application/json:
+              schema:
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Reservation'
+  /reservations/{reservationId}:
+    get:
+      summary: Get reservation
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: reservationId
+          required: true
+          schema: 
+            type: string
+      responses:
+        '200': 
+          description: ok
+          content: 
+            application/json: 
+              schema: 
+                $ref: '#/components/schemas/Reservation'
+    put:
+      summary: Update reservation
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: reservationId
+          required: true
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Reservation'
+      responses:
+        '200': 
+          description: updated
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Reservation'
+    delete:
+      summary: Cancel reservation
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: reservationId
+          required: true
+          schema: 
+            type: string
+      responses:
+        '204': 
+          description: cancelled
+  /taxes:
+    post:
+      summary: Create tax entry
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Tax'
+      responses:
+        '201': 
+          description: created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Tax'
+    get:
+      summary: List taxes
+      security:
+        - bearerAuth: []
+      responses:
+        '200': 
+          description: list
+          content: 
+            application/json: 
+              schema: 
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Tax'
+  /taxes/{taxId}:
+    put:
+      summary: Update tax (note - changes do not affect historical orders)
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: taxId
+          required: true
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Tax'
+      responses:
+        '200': 
+          description: updated
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Tax'
+    delete:
+      summary: Delete tax
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: taxId
+          required: true
+          schema: 
+            type: string
+      responses:
+        '204': 
+          description: No Content
+  /discounts:
+    post:
+      summary: Create discount
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Discount'
+      responses:
+        '201': 
+          description: created
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Discount'
+    get:
+      summary: List discounts
+      security:
+        - bearerAuth: []
+      responses:
+        '200': 
+          description: list
+          content: 
+            application/json: 
+              schema: 
+                type: array
+                items: 
+                  $ref: '#/components/schemas/Discount'
+  /discounts/{discountId}:
+    put:
+      summary: Update discount
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: discountId
+          required: true
+          schema: 
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              $ref: '#/components/schemas/Discount'
+      responses:
+        '200': 
+          description: updated
+          content:
+            application/json:
+              schema: 
+                $ref: '#/components/schemas/Discount'
+    delete:
+      summary: Delete discount
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: discountId
+          required: true
+          schema: 
+            type: string
+      responses:
+        '204': 
+          description: No Content
+  /webhooks/stripe:
+    post:
+      summary: Public endpoint to receive Stripe webhook events
+      description: Verify stripe signature in headers and handle events like payment_intent.succeeded/refunded
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: 
+              type: object
+      responses:
+        '200': 
+          description: received
+externalDocs:
+  description: Example usage and implementation notes
+  url: https://example.com/docs/saas-api
