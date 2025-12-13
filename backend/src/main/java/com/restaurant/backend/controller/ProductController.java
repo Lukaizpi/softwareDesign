@@ -1,7 +1,8 @@
 package com.restaurant.backend.controller;
 
-import com.restaurant.backend.Service.ProductService;
 import com.restaurant.backend.model.Product;
+import com.restaurant.backend.service.ProductService;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;

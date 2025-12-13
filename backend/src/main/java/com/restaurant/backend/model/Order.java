@@ -1,28 +1,26 @@
 package com.restaurant.backend.model;
 
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.time.Instant;
 
 public class Order {
-
     private Long id;
-    private String tableNumber;          // o "tableName", "room", etc.
-    private String employeeName;        // quién crea la comanda
-    private OrderStatus status;
-    private LocalDateTime createdAt;
+    private String tableNumber;
+    private String employeeName;
+    private OrderStatus status = OrderStatus.OPEN;
+
     private List<OrderItem> items = new ArrayList<>();
 
-    public Order() {
-    }
+    private double subtotal;
+    private double taxes;
+    private double total;
 
-    public Order(Long id, String tableNumber, String employeeName) {
-        this.id = id;
-        this.tableNumber = tableNumber;
-        this.employeeName = employeeName;
-        this.status = OrderStatus.OPEN;
-        this.createdAt = LocalDateTime.now();
-    }
+    private Instant createdAt;
+    private double discountAmount; // descuento fijo por ahora
+    private double serviceCharge; // opcional
+    private List<Payment> payments = new ArrayList<>();
+    private boolean refunded; // si la orden se ha refundado total o parcialmente
 
     public Long getId() {
         return id;
@@ -56,14 +54,6 @@ public class Order {
         this.status = status;
     }
 
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(LocalDateTime createdAt) {
-        this.createdAt = createdAt;
-    }
-
     public List<OrderItem> getItems() {
         return items;
     }
@@ -72,7 +62,67 @@ public class Order {
         this.items = items;
     }
 
-    public void addItem(OrderItem item) {
-        this.items.add(item);
+    public double getSubtotal() {
+        return subtotal;
+    }
+
+    public void setSubtotal(double subtotal) {
+        this.subtotal = subtotal;
+    }
+
+    public double getTaxes() {
+        return taxes;
+    }
+
+    public void setTaxes(double taxes) {
+        this.taxes = taxes;
+    }
+
+    public double getTotal() {
+        return total;
+    }
+
+    public void setTotal(double total) {
+        this.total = total;
+    }
+
+    public double getDiscountAmount() {
+        return discountAmount;
+    }
+
+    public void setDiscountAmount(double discountAmount) {
+        this.discountAmount = discountAmount;
+    }
+
+    public double getServiceCharge() {
+        return serviceCharge;
+    }
+
+    public void setServiceCharge(double serviceCharge) {
+        this.serviceCharge = serviceCharge;
+    }
+
+    public List<Payment> getPayments() {
+        return payments;
+    }
+
+    public void setPayments(List<Payment> payments) {
+        this.payments = payments;
+    }
+
+    public boolean isRefunded() {
+        return refunded;
+    }
+
+    public void setRefunded(boolean refunded) {
+        this.refunded = refunded;
+    }
+
+    public Instant getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(Instant createdAt) {
+        this.createdAt = createdAt;
     }
 }

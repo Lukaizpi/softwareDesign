@@ -6,17 +6,17 @@ public class Product {
     private String name;
     private String category; // ej: "food", "drink"
     private double price;
-    private double taxRate;  // porcentaje, ej: 0.10 = 10%
+    private Long taxId;
 
     public Product() {
     }
 
-    public Product(Long id, String name, String category, double price, double taxRate) {
+    public Product(Long id, String name, String category, double price, Long taxId) {
         this.id = id;
         this.name = name;
         this.category = category;
         this.price = price;
-        this.taxRate = taxRate;
+        this.taxId = taxId;
     }
 
     public Long getId() {
@@ -51,11 +51,11 @@ public class Product {
         this.price = price;
     }
 
-    public double getTaxRate() {
-        return taxRate;
+    public Long getTaxId() {
+        return taxId;
     }
 
-    public void setTaxRate(double taxRate) {
-        this.taxRate = taxRate;
+    public void setTaxId(Long taxId) {
+        this.taxId = taxId;
     }
 }

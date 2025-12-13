@@ -1,41 +1,24 @@
-package com.restaurant.backend.model; 
+package com.restaurant.backend.model;
 
 public class OrderItem {
-
-    private Long id;
     private Long productId;
+    private String productName;
+    private double unitPrice;
+    private double taxRate;
     private int quantity;
 
-    public OrderItem() {
-    }
+    public Long getProductId() { return productId; }
+    public void setProductId(Long productId) { this.productId = productId; }
 
-    public OrderItem(Long id, Long productId, int quantity) {
-        this.id = id;
-        this.productId = productId;
-        this.quantity = quantity;
-    }
+    public String getProductName() { return productName; }
+    public void setProductName(String productName) { this.productName = productName; }
 
-    public Long getId() {
-        return id;
-    }
+    public double getUnitPrice() { return unitPrice; }
+    public void setUnitPrice(double unitPrice) { this.unitPrice = unitPrice; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public double getTaxRate() { return taxRate; }
+    public void setTaxRate(double taxRate) { this.taxRate = taxRate; }
 
-    public Long getProductId() {
-        return productId;
-    }
-
-    public void setProductId(Long productId) {
-        this.productId = productId;
-    }
-
-    public int getQuantity() {
-        return quantity;
-    }
-
-    public void setQuantity(int quantity) {
-        this.quantity = quantity;
-    }
+    public int getQuantity() { return quantity; }
+    public void setQuantity(int quantity) { this.quantity = quantity; }
 }

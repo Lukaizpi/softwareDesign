@@ -1,17 +1,17 @@
-package com.restaurant.backend.controller; 
+package com.restaurant.backend.controller;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import com.restaurant.backend.Service.OrderService;
 import com.restaurant.backend.model.Order;
+import com.restaurant.backend.service.OrderService;
+import com.restaurant.backend.dto.*;
 
 import java.util.List;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/api/orders")
-@CrossOrigin(origins = "*") // para que luego React pueda llamar sin problemas
+@CrossOrigin(origins = "*")
 public class OrderController {
 
     private final OrderService orderService;
@@ -20,13 +20,11 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    // GET /api/orders -> lista todas las órdenes
     @GetMapping
     public List<Order> getAllOrders() {
         return orderService.getAllOrders();
     }
 
-    // GET /api/orders/{id}
     @GetMapping("/{id}")
     public ResponseEntity<Order> getOrderById(@PathVariable Long id) {
         return orderService.getOrderById(id)
@@ -34,29 +32,18 @@ public class OrderController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // POST /api/orders  (body: { "tableNumber": "5", "employeeName": "Juan" })
     @PostMapping
-    public Order createOrder(@RequestBody Map<String, String> request) {
-        String tableNumber = request.get("tableNumber");
-        String employeeName = request.get("employeeName");
-        return orderService.createOrder(tableNumber, employeeName);
+    public ResponseEntity<Order> createOrder(@RequestBody CreateOrderRequest req) {
+        return ResponseEntity.ok(orderService.createOrder(req.tableNumber, req.employeeName));
     }
 
-    // POST /api/orders/{id}/items  (body: { "productId": 1, "quantity": 2 })
     @PostMapping("/{id}/items")
-    public ResponseEntity<Order> addItem(
-            @PathVariable Long id,
-            @RequestBody Map<String, Object> request
-    ) {
-        Long productId = Long.valueOf(request.get("productId").toString());
-        int quantity = Integer.parseInt(request.get("quantity").toString());
-
-        return orderService.addItemToOrder(id, productId, quantity)
+    public ResponseEntity<Order> addItem(@PathVariable Long id, @RequestBody AddItemRequest req) {
+        return orderService.addItemToOrder(id, req.productId, req.quantity)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.badRequest().build());
     }
 
-    // POST /api/orders/{id}/cancel
     @PostMapping("/{id}/cancel")
     public ResponseEntity<Order> cancelOrder(@PathVariable Long id) {
         return orderService.cancelOrder(id)
@@ -64,10 +51,37 @@ public class OrderController {
                 .orElse(ResponseEntity.badRequest().build());
     }
 
-    // POST /api/orders/{id}/pay
     @PostMapping("/{id}/pay")
     public ResponseEntity<Order> payOrder(@PathVariable Long id) {
         return orderService.markAsPaid(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<Order> updateStatus(@PathVariable Long id, @RequestBody UpdateStatusRequest req) {
+        return orderService.updateStatus(id, req.status)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping("/{id}/discount")
+    public ResponseEntity<Order> applyDiscount(@PathVariable Long id, @RequestBody ApplyDiscountRequest req) {
+        return orderService.applyDiscount(id, req.amount)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping("/{id}/payments")
+    public ResponseEntity<Order> addPayment(@PathVariable Long id, @RequestBody AddPaymentRequest req) {
+        return orderService.addPayment(id, req.method, req.amount, req.tip)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping("/{id}/refund")
+    public ResponseEntity<Order> refund(@PathVariable Long id, @RequestBody RefundRequest req) {
+        return orderService.refund(id, req.amount)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.badRequest().build());
     }
