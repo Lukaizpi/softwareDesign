@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useEffect, useState } from 'react';
 import {
   getProducts,
@@ -248,6 +249,7 @@ function App() {
   }
 
   return (
+<<<<<<< HEAD
     <div className="app-container">
       <header className="app-header">
         <div className="header-top">
@@ -663,3 +665,18 @@ function App() {
 }
 
 export default App;
+=======
+    <div style={{ padding: 20, fontFamily: "system-ui" }}>
+      <h1>Restaurant POS</h1>
+
+      <nav style={{ display: "flex", gap: 12, marginBottom: 16 }}>
+        <button onClick={() => setTab("orders")}>Orders</button>
+        <button onClick={() => setTab("products")}>Products</button>
+      </nav>
+
+      {tab === "orders" && <OrdersPage />}
+      {tab === "products" && <ProductsPage />}
+    </div>
+  );
+}
+>>>>>>> 951eebe897e771b046e4f6fdcf2dfaf45c66ea54

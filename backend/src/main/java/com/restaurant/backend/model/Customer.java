@@ -40,4 +40,3 @@ public class Customer {
         return (firstName != null ? firstName : "") + " " + (lastName != null ? lastName : "");
     }
 }
-
