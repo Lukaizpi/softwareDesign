@@ -1,4 +1,4 @@
-package com.restaurant.backend.service;
+package com.restaurant.backend.Service;
 
 import com.restaurant.backend.model.Tax;
 import org.springframework.stereotype.Service;

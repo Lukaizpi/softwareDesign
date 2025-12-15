@@ -17,10 +17,16 @@ public class Order {
     private double total;
 
     private Instant createdAt;
-    private double discountAmount; // descuento fijo por ahora
-    private double serviceCharge; // opcional
+    private double discountAmount; // order-level discount
+    private double serviceCharge; // optional
     private List<Payment> payments = new ArrayList<>();
-    private boolean refunded; // si la orden se ha refundado total o parcialmente
+    private List<PaymentSplit> paymentSplits = new ArrayList<>(); // for split payments
+    private List<Refund> refunds = new ArrayList<>();
+    private boolean refunded; // if order has been refunded (total or partial)
+    private Long merchantId;
+    private Long branchId;
+    private Long employeeId; // user who created/manages this order
+    private boolean itemsLocked = false; // locked during split payment
 
     public Long getId() {
         return id;
@@ -125,4 +131,22 @@ public class Order {
     public void setCreatedAt(Instant createdAt) {
         this.createdAt = createdAt;
     }
+
+    public List<PaymentSplit> getPaymentSplits() { return paymentSplits; }
+    public void setPaymentSplits(List<PaymentSplit> paymentSplits) { this.paymentSplits = paymentSplits; }
+
+    public List<Refund> getRefunds() { return refunds; }
+    public void setRefunds(List<Refund> refunds) { this.refunds = refunds; }
+
+    public Long getMerchantId() { return merchantId; }
+    public void setMerchantId(Long merchantId) { this.merchantId = merchantId; }
+
+    public Long getBranchId() { return branchId; }
+    public void setBranchId(Long branchId) { this.branchId = branchId; }
+
+    public Long getEmployeeId() { return employeeId; }
+    public void setEmployeeId(Long employeeId) { this.employeeId = employeeId; }
+
+    public boolean isItemsLocked() { return itemsLocked; }
+    public void setItemsLocked(boolean itemsLocked) { this.itemsLocked = itemsLocked; }
 }

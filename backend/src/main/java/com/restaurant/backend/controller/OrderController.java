@@ -4,7 +4,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import com.restaurant.backend.model.Order;
-import com.restaurant.backend.service.OrderService;
+import com.restaurant.backend.Service.OrderService;
 import com.restaurant.backend.dto.*;
 
 import java.util.List;
@@ -82,6 +82,36 @@ public class OrderController {
     @PostMapping("/{id}/refund")
     public ResponseEntity<Order> refund(@PathVariable Long id, @RequestBody RefundRequest req) {
         return orderService.refund(id, req.amount)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
+    }
+
+    // Split Payment Endpoints
+    @PostMapping("/{id}/split/start")
+    public ResponseEntity<Order> startSplitPayment(@PathVariable Long id) {
+        return orderService.startSplitPayment(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping("/{id}/split")
+    public ResponseEntity<Order> addPaymentSplit(@PathVariable Long id, @RequestBody SplitPaymentRequest req) {
+        double tip = req.tip >= 0 ? req.tip : 0.0;
+        return orderService.addPaymentSplit(
+                id,
+                req.customerName,
+                req.method,
+                req.amount,
+                tip,
+                req.itemIds
+        )
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.badRequest().build());
+    }
+
+    @PostMapping("/{id}/split/complete")
+    public ResponseEntity<Order> completeSplitPayment(@PathVariable Long id) {
+        return orderService.completeSplitPayment(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.badRequest().build());
     }

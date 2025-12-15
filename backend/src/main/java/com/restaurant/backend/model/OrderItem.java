@@ -1,6 +1,7 @@
 package com.restaurant.backend.model;
 
 public class OrderItem {
+    private Long id; // Unique ID for this item instance in the order
     private Long productId;
     private String productName;
     private double unitPrice;
@@ -21,4 +22,7 @@ public class OrderItem {
 
     public int getQuantity() { return quantity; }
     public void setQuantity(int quantity) { this.quantity = quantity; }
+
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 }

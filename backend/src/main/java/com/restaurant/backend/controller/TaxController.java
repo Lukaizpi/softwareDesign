@@ -1,7 +1,7 @@
 package com.restaurant.backend.controller;
 
 import com.restaurant.backend.model.Tax;
-import com.restaurant.backend.service.TaxService;
+import com.restaurant.backend.Service.TaxService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
