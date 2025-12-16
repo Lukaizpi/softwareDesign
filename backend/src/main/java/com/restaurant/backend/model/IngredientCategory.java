@@ -26,3 +26,4 @@ public class IngredientCategory {
     public void setIngredients(List<Ingredient> ingredients) { this.ingredients = ingredients; }
 }
 
+

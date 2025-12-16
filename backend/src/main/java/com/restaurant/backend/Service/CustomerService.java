@@ -27,7 +27,8 @@ public class CustomerService {
     public Customer create(String name, String phone, String email) {
         Customer c = new Customer();
         c.setId(seq.getAndIncrement());
-        c.setName(name);
+        // Map the provided name to the customer's first name, since Customer has firstName/lastName fields
+        c.setFirstName(name);
         c.setPhone(phone);
         c.setEmail(email);
         customers.put(c.getId(), c);

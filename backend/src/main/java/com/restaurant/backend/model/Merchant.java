@@ -43,3 +43,4 @@ public class Merchant {
     public void setBranches(List<Branch> branches) { this.branches = branches; }
 }
 
+

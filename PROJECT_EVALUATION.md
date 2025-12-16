@@ -284,3 +284,4 @@ El proyecto es **FUNCIONAL y ENTREGABLE** para una demostración o MVP (Minimum 
 
 **Última actualización**: Diciembre 2024
 
+

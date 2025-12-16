@@ -70,3 +70,4 @@ public class User {
     public void setBranch(Branch branch) { this.branch = branch; }
 }
 
+

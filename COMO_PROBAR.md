@@ -181,3 +181,4 @@ Para llegar al 100%:
 4. UI de configuración de impuestos
 5. Vista de calendario avanzada para reservas
 
+

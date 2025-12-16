@@ -74,3 +74,4 @@ public class Reservation {
     public void setMerchantId(Long merchantId) { this.merchantId = merchantId; }
 }
 
+

@@ -35,3 +35,4 @@ public class Ingredient {
     public void setStock(Double stock) { this.stock = stock; }
 }
 
+

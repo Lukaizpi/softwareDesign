@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { useEffect, useState } from 'react';
 import {
   getProducts,
@@ -249,7 +248,6 @@ function App() {
   }
 
   return (
-<<<<<<< HEAD
     <div className="app-container">
       <header className="app-header">
         <div className="header-top">
