@@ -1,0 +1,106 @@
+.discount-management {
+  padding: 2rem;
+}
+
+.discount-form {
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  margin-bottom: 2rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.discount-form h3 {
+  margin-top: 0;
+  margin-bottom: 1.5rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.discounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.5rem;
+  margin-top: 1rem;
+}
+
+.discount-card {
+  background: white;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 1.5rem;
+  transition: all 0.3s;
+}
+
+.discount-card.active {
+  border-color: #10b981;
+}
+
+.discount-card.inactive {
+  border-color: #ef4444;
+  opacity: 0.7;
+}
+
+.discount-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.discount-header h4 {
+  margin: 0;
+  color: #333;
+}
+
+.discount-status {
+  padding: 0.25rem 0.75rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.discount-status.active {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.discount-status.scheduled {
+  background: #fef3c7;
+  color: #92400e;
+}
+
+.discount-status.inactive {
+  background: #fee2e2;
+  color: #991b1b;
+}
+
+.discount-info p {
+  margin: 0.5rem 0;
+  color: #555;
+  font-size: 0.875rem;
+}
+
+.discount-actions {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
+}
+
+.discount-actions button {
+  padding: 0.5rem 1rem;
+  background: #667eea;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.discount-actions button:hover {
+  background: #5568d3;
+}
